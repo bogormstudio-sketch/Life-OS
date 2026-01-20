@@ -659,19 +659,21 @@
       refreshAuthUI();
     })();
     async function loginEmail() 
-    // ✅ Hide auth box when user is logged in
+    function hideAuthBox() {
+  const box = document.getElementById("authBox");
+  if (box) box.style.display = "none";
+}
+
+// When page loads
 sb.auth.getSession().then(({ data }) => {
-  if (data.session) {
-    document.getElementById("authBox").style.display = "none";
-  }
+  if (data.session) hideAuthBox();
 });
 
-// ✅ Also hide it immediately after login
+// When user logs in (Google or Email)
 sb.auth.onAuthStateChange((_event, session) => {
-  if (session) {
-    document.getElementById("authBox").style.display = "none";
-  }
+  if (session) hideAuthBox();
 });
+
 
   </script>
 </body>
