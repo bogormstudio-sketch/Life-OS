@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>  
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
@@ -261,6 +262,12 @@
 <script>
 const SUPABASE_URL = "https://ogatcgdefwelciohqhsy.supabase.co"
 const SUPABASE_ANON_KEY = "sb_publishable_lW_rK73SLbZyb_sHRD562g_TJydjNI_"
+
+const supabase = supabaseJs.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+  
 /* ========= Life OS v1 (local-first) ========= */
 const LS_KEY = "life_os_v1";
 const todayKey = () => new Date().toISOString().slice(0,10); // YYYY-MM-DD
