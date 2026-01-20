@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b0f" />
+  <title>Life OS</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root { --bg:#0b0b0f; --card:#151522; --muted:#a7a7c7; --text:#f2f2ff; --accent:#7c5cff; --ok:#30d158; --warn:#ffd60a; }
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+    header{position:sticky;top:0;background:rgba(11,11,15,.9);backdrop-filter: blur(10px);padding:14px 14px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
+    h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .sub{margin-top:4px;color:var(--muted);font-size:12px}
+    main{padding:14px; padding-bottom:84px; max-width:780px; margin:0 auto}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+    .card h2{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
+    .pill{display:inline-flex;align-items:center;gap:8px;background:rgba(124,92,255,.14);border:1px solid rgba(124,92,255,.35);padding:8px 10px;border-radius:999px;font-size:12px;color:#e9e6ff}
+    .btn{appearance:none;border:0;background:var(--accent);color:white;border-radius:12px;padding:10px 12px;font-weight:600;font-size:13px}
+    .btn.secondary{background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.10)}
+    .btn.danger{background:rgba(255,59,48,.15);border:1px solid rgba(255,59,48,.35);color:#ffd6d3}
+    .btn.small{padding:8px 10px;border-radius:10px;font-size:12px}
+    .grid{display:grid;gap:10px}
+    @media (min-width:720px){ .grid.two{grid-template-columns:1fr 1fr} .grid.three{grid-template-columns:1fr 1fr 1fr} }
+    .check{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+    .check label{display:flex;align-items:center;gap:10px;font-size:13px}
+    input[type="checkbox"]{width:18px;height:18px}
+    input[type="text"], input[type="number"], textarea, select, input[type="time"]{
+      width:100%; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+      color:var(--text); border-radius:12px; padding:10px 12px; font-size:13px; outline:none
+    }
+    textarea{min-height:92px; resize:vertical}
+    .muted{color:var(--muted);font-size:12px}
+    .kpi{display:flex;gap:10px;flex-wrap:wrap}
+    .kpi .box{flex:1;min-width:120px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:12px}
+    .kpi .num{font-size:18px;font-weight:800}
+    .kpi .lbl{font-size:12px;color:var(--muted);margin-top:3px}
+    nav{position:fixed;left:0;right:0;bottom:0;background:rgba(11,11,15,.92);backdrop-filter: blur(10px);
+      border-top:1px solid rgba(255,255,255,.06); padding:10px 10px}
+    .tabs{display:flex;gap:8px;max-width:780px;margin:0 auto}
+    .tab{flex:1;text-align:center;padding:10px 8px;border-radius:14px;font-size:12px;color:var(--muted);border:1px solid rgba(255,255,255,.06)}
+    .tab.active{color:var(--text);background:rgba(124,92,255,.16);border-color:rgba(124,92,255,.35)}
+    .hide{display:none}
+    .sep{height:1px;background:rgba(255,255,255,.06);margin:12px 0}
+    .tag{font-size:11px;color:var(--muted)}
+    .goal{padding:12px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+    .goal .t{font-weight:700;font-size:13px}
+    .goal .d{color:var(--muted);font-size:12px;margin-top:4px}
+    .goal .a{margin-top:8px;font-size:12px}
+    .right{display:flex;gap:8px;align-items:center}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:86px;background:rgba(21,21,34,.98);
+      border:1px solid rgba(255,255,255,.10); padding:10px 12px;border-radius:999px;font-size:12px;color:var(--text);display:none}
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Life OS</h1>
+    <div class="sub" id="subline">Today</div>
+  </header>
+
+  <main>
+    <!-- TODAY -->
+    <section id="screen-today">
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span class="pill" id="datePill">—</span>
+        <div class="right">
+          <button class="btn small secondary" id="btnLowEnergy">Low-energy mode</button>
+          <button class="btn small secondary" id="btnNotif">Enable reminders</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:10px;">
+        <h2>What matters today (max 10 words)</h2>
+        <input id="focusLine" type="text" placeholder="Example: Salah + water + 10 min course" maxlength="80" />
+        <div class="muted" style="margin-top:8px;">Tip: keep it short so you don’t overthink.</div>
+      </div>
+
+      <div class="grid two">
+        <div class="card">
+          <h2>IBADAH (Fard first)</h2>
+          <div class="grid">
+            <div class="check"><label><input type="checkbox" data-key="salah5"> 5 Salah</label><span class="tag">must</span></div>
+            <div class="check"><label><input type="checkbox" data-key="tasbeeh"> Tasbeehat</label><span class="tag">daily</span></div>
+            <div class="check"><label><input type="checkbox" data-key="quranMin"> Quran (min)</label><span class="tag">min 1 page</span></div>
+            <div class="sep"></div>
+            <div class="check"><label><input type="checkbox" data-key="tahajjud"> Tahajjud</label><span class="tag">bonus</span></div>
+            <div class="check"><label><input type="checkbox" data-key="ishraq"> Ishraq</label><span class="tag">bonus</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>BODY</h2>
+          <div class="grid">
+            <div class="check">
+              <label>Water (L)</label>
+              <div class="right">
+                <button class="btn small secondary" id="waterMinus">-</button>
+                <div class="num" id="waterVal">0</div>
+                <button class="btn small secondary" id="waterPlus">+</button>
+              </div>
+            </div>
+
+            <div class="check">
+              <label>Steps</label>
+              <input type="number" id="stepsVal" inputmode="numeric" placeholder="15000" />
+            </div>
+
+            <div class="check">
+              <label>Sleep (hours)</label>
+              <input type="number" id="sleepVal" inputmode="decimal" placeholder="9" step="0.25" />
+            </div>
+
+            <div class="check">
+              <label>Movement</label>
+              <select id="moveVal">
+                <option value="none">Not yet</option>
+                <option value="min">Minimum (5–10 min)</option>
+                <option value="full">Full (walk/gym/stretch)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h2>BUILD (Career / Brand)</h2>
+        <div class="grid">
+          <div class="check"><label><input type="checkbox" data-key="coursera"> Coursera (min 10 min)</label><span class="tag">min counts</span></div>
+          <div class="check"><label><input type="checkbox" data-key="bakingOrCafe"> Baking / café prep</label><span class="tag">create</span></div>
+          <div class="check"><label><input type="checkbox" data-key="igAction"> IG action (post/story/idea)</label><span class="tag">share</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h2>Quick stats</h2>
+        <div class="kpi">
+          <div class="box"><div class="num" id="kpiDone">0/0</div><div class="lbl">Today done</div></div>
+          <div class="box"><div class="num" id="kpiWater">0/3</div><div class="lbl">Water goal (3L)</div></div>
+          <div class="box"><div class="num" id="kpiStreak">0</div><div class="lbl">Tracking streak</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GOALS -->
+    <section id="screen-goals" class="hide">
+      <div class="grid two">
+        <div class="card">
+          <h2>Short-term goals (2.5 months)</h2>
+          <div id="shortGoals" class="grid"></div>
+          <div class="sep"></div>
+          <div class="grid">
+            <input id="sgTitle" type="text" placeholder="Goal title (short-term)" />
+            <input id="sgDeadline" type="text" placeholder="Deadline (e.g., Apr 5)" />
+            <input id="sgNext" type="text" placeholder="Next tiny action (important)" />
+            <button class="btn" id="addShort">Add short-term goal</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Long-term goals</h2>
+          <div id="longGoals" class="grid"></div>
+          <div class="sep"></div>
+          <div class="grid">
+            <input id="lgTitle" type="text" placeholder="Goal title (long-term)" />
+            <input id="lgWhy" type="text" placeholder="Why it matters (1 line)" />
+            <button class="btn" id="addLong">Add long-term goal</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- JOURNAL -->
+    <section id="screen-journal" class="hide">
+      <div class="card">
+        <h2>Daily journal (30–60 seconds)</h2>
+        <div class="grid">
+          <textarea id="jDid" placeholder="Today I did…"></textarea>
+          <textarea id="jStruggle" placeholder="Today I struggled with…"></textarea>
+          <textarea id="jWin" placeholder="One small win…"></textarea>
+          <button class="btn" id="saveJournal">Save journal</button>
+          <div class="muted" id="journalSaved" style="display:none;">Saved.</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h2>Recent entries</h2>
+        <div class="muted">Tap any date to view.</div>
+        <div id="journalList" class="grid" style="margin-top:10px;"></div>
+      </div>
+    </section>
+
+    <!-- REMINDERS -->
+    <section id="screen-reminders" class="hide">
+      <div class="card">
+        <h2>Reminders (simple + effective)</h2>
+        <div class="muted">Note: true background reminders depend on your phone/browser. This app will remind when open; notifications can work if allowed.</div>
+        <div class="sep"></div>
+        <div class="grid">
+          <label class="muted">Reminder style</label>
+          <select id="reminderStyle">
+            <option value="gentle">Gentle</option>
+            <option value="strict">Strict</option>
+          </select>
+
+          <label class="muted">Times (optional)</label>
+          <div class="grid two">
+            <input type="time" id="tWater" />
+            <input type="time" id="tCourse" />
+          </div>
+          <div class="muted">Left: water check, Right: course check</div>
+
+          <button class="btn" id="saveReminders">Save reminders</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h2>Reset / backup</h2>
+        <div class="grid two">
+          <button class="btn secondary" id="exportData">Export data</button>
+          <button class="btn secondary" id="importData">Import data</button>
+        </div>
+        <div class="sep"></div>
+        <button class="btn danger" id="wipeAll">Wipe everything</button>
+      </div>
+    </section>
+
+    <!-- WEEKLY -->
+    <section id="screen-weekly" class="hide">
+      <div class="card">
+        <h2>Weekly reset (10 minutes)</h2>
+        <div class="grid">
+          <textarea id="wWorked" placeholder="What worked this week?"></textarea>
+          <textarea id="wDidnt" placeholder="What didn’t work?"></textarea>
+          <textarea id="wFix" placeholder="ONE fix for next week"></textarea>
+          <button class="btn" id="saveWeekly">Save weekly reset</button>
+          <div class="muted" id="weeklySaved" style="display:none;">Saved.</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h2>Tracking calendar (last 14 days)</h2>
+        <div id="cal14" class="grid two" style="margin-top:10px;"></div>
+      </div>
+    </section>
+
+    <div class="toast" id="toast">Saved</div>
+  </main>
+
+  <nav>
+    <div class="tabs">
+      <div class="tab active" data-tab="today">Today</div>
+      <div class="tab" data-tab="goals">Goals</div>
+      <div class="tab" data-tab="journal">Journal</div>
+      <div class="tab" data-tab="reminders">Reminders</div>
+      <div class="tab" data-tab="weekly">Weekly</div>
+    </div>
+  </nav>
+
+<script>
+/* ========= Life OS v1 (local-first) ========= */
+const LS_KEY = "life_os_v1";
+const todayKey = () => new Date().toISOString().slice(0,10); // YYYY-MM-DD
+
+const defaults = () => ({
+  meta: {
+    createdAt: Date.now(),
+    lastOpen: Date.now(),
+    trackingStreak: 0,
+    lastTrackedDay: null,
+    lowEnergy: false
+  },
+  day: {}, // day[YYYY-MM-DD] = { checks:{}, waterL, steps, sleepH, movement, focusLine }
+  goals: { short: [], long: [] },
+  journal: {}, // journal[YYYY-MM-DD] = { did, struggle, win, savedAt }
+  weekly: {}, // weekly[YYYY-WW] = { worked, didnt, fix, savedAt }
+  reminders: { style: "gentle", tWater: "", tCourse: "" }
+});
+
+let state = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return defaults();
+    const s = JSON.parse(raw);
+    return {...defaults(), ...s, meta:{...defaults().meta, ...(s.meta||{})}};
+  }catch(e){
+    return defaults();
+  }
+}
+function save(){
+  state.meta.lastOpen = Date.now();
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=> t.style.display="none", 1400);
+}
+
+function getDay(){
+  const k = todayKey();
+  if(!state.day[k]) state.day[k] = {
+    checks: {},
+    waterL: 0,
+    steps: "",
+    sleepH: "",
+    movement: "none",
+    focusLine: ""
+  };
+  return state.day[k];
+}
+
+function updateStreakIfTracked(){
+  const k = todayKey();
+  const d = getDay();
+  const tracked = (Object.values(d.checks||{}).some(Boolean)) ||
+                  (Number(d.waterL||0)>0) ||
+                  (String(d.steps||"").trim()!=="") ||
+                  (String(d.sleepH||"").trim()!=="") ||
+                  (d.movement && d.movement!=="none") ||
+                  (String(d.focusLine||"").trim()!=="");
+  if(!tracked) return;
+
+  const last = state.meta.lastTrackedDay;
+  if(last === k) return;
+
+  // difference in days
+  if(last){
+    const a = new Date(last);
+    const b = new Date(k);
+    const diff = Math.round((b - a)/(1000*60*60*24));
+    if(diff === 1) state.meta.trackingStreak = (state.meta.trackingStreak||0)+1;
+    else state.meta.trackingStreak = 1;
+  } else {
+    state.meta.trackingStreak = 1;
+  }
+  state.meta.lastTrackedDay = k;
+}
+
+/* ====== UI bindings ====== */
+const screens = {
+  today: document.getElementById("screen-today"),
+  goals: document.getElementById("screen-goals"),
+  journal: document.getElementById("screen-journal"),
+  reminders: document.getElementById("screen-reminders"),
+  weekly: document.getElementById("screen-weekly"),
+};
+const subline = document.getElementById("subline");
+
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    const tab = t.dataset.tab;
+    Object.keys(screens).forEach(k=>screens[k].classList.add("hide"));
+    screens[tab].classList.remove("hide");
+    subline.textContent = tab[0].toUpperCase()+tab.slice(1);
+    renderAll();
+  });
+});
+
+function bindToday(){
+  document.getElementById("datePill").textContent = new Date().toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric"});
+  const d = getDay();
+
+  // focus
+  const focus = document.getElementById("focusLine");
+  focus.value = d.focusLine || "";
+  focus.oninput = () => { d.focusLine = focus.value; save(); updateStreakIfTracked(); renderKPIs(); };
+
+  // checks
+  document.querySelectorAll('input[type="checkbox"][data-key]').forEach(cb=>{
+    const key = cb.dataset.key;
+    cb.checked = !!(d.checks && d.checks[key]);
+    cb.onchange = () => {
+      d.checks[key] = cb.checked;
+      save(); updateStreakIfTracked(); renderKPIs();
+    };
+  });
+
+  // water
+  document.getElementById("waterVal").textContent = d.waterL || 0;
+  document.getElementById("waterPlus").onclick = () => {
+    d.waterL = Math.min(10, Number(d.waterL||0)+1);
+    save(); updateStreakIfTracked(); renderKPIs(); bindToday();
+  };
+  document.getElementById("waterMinus").onclick = () => {
+    d.waterL = Math.max(0, Number(d.waterL||0)-1);
+    save(); updateStreakIfTracked(); renderKPIs(); bindToday();
+  };
+
+  // steps/sleep/move
+  const steps = document.getElementById("stepsVal");
+  steps.value = d.steps || "";
+  steps.oninput = () => { d.steps = steps.value; save(); updateStreakIfTracked(); renderKPIs(); };
+
+  const sleep = document.getElementById("sleepVal");
+  sleep.value = d.sleepH || "";
+  sleep.oninput = () => { d.sleepH = sleep.value; save(); updateStreakIfTracked(); renderKPIs(); };
+
+  const move = document.getElementById("moveVal");
+  move.value = d.movement || "none";
+  move.onchange = () => { d.movement = move.value; save(); updateStreakIfTracked(); renderKPIs(); };
+
+  // low energy mode toggle
+  const btnLow = document.getElementById("btnLowEnergy");
+  btnLow.textContent = state.meta.lowEnergy ? "Low-energy: ON" : "Low-energy mode";
+  btnLow.onclick = () => {
+    state.meta.lowEnergy = !state.meta.lowEnergy;
+    save();
+    renderAll();
+    toast(state.meta.lowEnergy ? "Low-energy ON" : "Low-energy OFF");
+  };
+}
+
+function renderKPIs(){
+  const d = getDay();
+  const keys = Array.from(document.querySelectorAll('input[type="checkbox"][data-key]')).map(x=>x.dataset.key);
+  const done = keys.filter(k=>d.checks && d.checks[k]).length;
+  const total = keys.length;
+
+  document.getElementById("kpiDone").textContent = `${done}/${total}`;
+  document.getElementById("kpiWater").textContent = `${Number(d.waterL||0)}/3`;
+  document.getElementById("kpiStreak").textContent = String(state.meta.trackingStreak||0);
+
+  // Low-energy mode: visually de-emphasize bonuses
+  const bonusKeys = ["tahajjud","ishraq"];
+  document.querySelectorAll('input[type="checkbox"][data-key]').forEach(cb=>{
+    const wrap = cb.closest(".check");
+    if(state.meta.lowEnergy && bonusKeys.includes(cb.dataset.key)){
+      wrap.style.opacity = 0.5;
+    } else {
+      wrap.style.opacity = 1;
+    }
+  });
+}
+
+function renderGoals(){
+  const sg = document.getElementById("shortGoals");
+  const lg = document.getElementById("longGoals");
+  sg.innerHTML = "";
+  lg.innerHTML = "";
+
+  state.goals.short.forEach((g, idx)=>{
+    const el = document.createElement("div");
+    el.className = "goal";
+    el.innerHTML = `
+      <div class="t">${escapeHtml(g.title||"")}</div>
+      <div class="d">Deadline: ${escapeHtml(g.deadline||"")}</div>
+      <div class="a"><span class="muted">Next action:</span> ${escapeHtml(g.next||"")}</div>
+      <div class="row" style="margin-top:10px;justify-content:space-between;">
+        <button class="btn small secondary" data-act="done">Mark done</button>
+        <button class="btn small danger" data-act="del">Delete</button>
+      </div>
+    `;
+    el.querySelector('[data-act="done"]').onclick = ()=>{
+      state.goals.short[idx].done = true;
+      toast("Marked done");
+      save();
+      // move to bottom
+      state.goals.short.push(state.goals.short.splice(idx,1)[0]);
+      renderGoals();
+    };
+    el.querySelector('[data-act="del"]').onclick = ()=>{
+      state.goals.short.splice(idx,1);
+      save(); renderGoals(); toast("Deleted");
+    };
+    if(g.done) el.style.opacity = 0.55;
+    sg.appendChild(el);
+  });
+
+  state.goals.long.forEach((g, idx)=>{
+    const el = document.createElement("div");
+    el.className = "goal";
+    el.innerHTML = `
+      <div class="t">${escapeHtml(g.title||"")}</div>
+      <div class="d">${escapeHtml(g.why||"")}</div>
+      <div class="row" style="margin-top:10px;justify-content:flex-end;">
+        <button class="btn small danger" data-act="del">Delete</button>
+      </div>
+    `;
+    el.querySelector('[data-act="del"]').onclick = ()=>{
+      state.goals.long.splice(idx,1);
+      save(); renderGoals(); toast("Deleted");
+    };
+    lg.appendChild(el);
+  });
+
+  document.getElementById("addShort").onclick = ()=>{
+    const title = document.getElementById("sgTitle").value.trim();
+    const deadline = document.getElementById("sgDeadline").value.trim();
+    const next = document.getElementById("sgNext").value.trim();
+    if(!title) return toast("Add a title");
+    state.goals.short.unshift({title, deadline, next, done:false, createdAt:Date.now()});
+    document.getElementById("sgTitle").value="";
+    document.getElementById("sgDeadline").value="";
+    document.getElementById("sgNext").value="";
+    save(); renderGoals(); toast("Added");
+  };
+
+  document.getElementById("addLong").onclick = ()=>{
+    const title = document.getElementById("lgTitle").value.trim();
+    const why = document.getElementById("lgWhy").value.trim();
+    if(!title) return toast("Add a title");
+    state.goals.long.unshift({title, why, createdAt:Date.now()});
+    document.getElementById("lgTitle").value="";
+    document.getElementById("lgWhy").value="";
+    save(); renderGoals(); toast("Added");
+  };
+}
+
+function renderJournal(){
+  const k = todayKey();
+  const j = state.journal[k] || {did:"", struggle:"", win:""};
+  document.getElementById("jDid").value = j.did || "";
+  document.getElementById("jStruggle").value = j.struggle || "";
+  document.getElementById("jWin").value = j.win || "";
+
+  document.getElementById("saveJournal").onclick = ()=>{
+    state.journal[k] = {
+      did: document.getElementById("jDid").value.trim(),
+      struggle: document.getElementById("jStruggle").value.trim(),
+      win: document.getElementById("jWin").value.trim(),
+      savedAt: Date.now()
+    };
+    save();
+    updateStreakIfTracked();
+    document.getElementById("journalSaved").style.display="block";
+    setTimeout(()=>document.getElementById("journalSaved").style.display="none", 1000);
+    toast("Journal saved");
+    renderJournalList();
+  };
+
+  renderJournalList();
+}
+
+function renderJournalList(){
+  const list = document.getElementById("journalList");
+  list.innerHTML = "";
+  const keys = Object.keys(state.journal).sort().reverse().slice(0,14);
+  if(keys.length===0){
+    const m = document.createElement("div");
+    m.className="muted";
+    m.textContent="No entries yet.";
+    list.appendChild(m);
+    return;
+  }
+  keys.forEach(k=>{
+    const el = document.createElement("div");
+    el.className="check";
+    el.style.cursor="pointer";
+    el.innerHTML = `<label>${k}</label><span class="tag">view</span>`;
+    el.onclick = ()=>{
+      const j = state.journal[k];
+      alert(`${k}\n\nDid: ${j.did||"-"}\n\nStruggled: ${j.struggle||"-"}\n\nWin: ${j.win||"-"}`);
+    };
+    list.appendChild(el);
+  });
+}
+
+function renderReminders(){
+  document.getElementById("reminderStyle").value = state.reminders.style || "gentle";
+  document.getElementById("tWater").value = state.reminders.tWater || "";
+  document.getElementById("tCourse").value = state.reminders.tCourse || "";
+
+  document.getElementById("saveReminders").onclick = ()=>{
+    state.reminders.style = document.getElementById("reminderStyle").value;
+    state.reminders.tWater = document.getElementById("tWater").value;
+    state.reminders.tCourse = document.getElementById("tCourse").value;
+    save();
+    toast("Reminders saved");
+  };
+
+  document.getElementById("exportData").onclick = ()=>{
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "life_os_backup.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  document.getElementById("importData").onclick = async ()=>{
+    const inp = document.createElement("input");
+    inp.type = "file";
+    inp.accept = "application/json";
+    inp.onchange = async () => {
+      const file = inp.files[0];
+      if(!file) return;
+      const text = await file.text();
+      try{
+        const obj = JSON.parse(text);
+        state = {...defaults(), ...obj};
+        save();
+        toast("Imported");
+        renderAll();
+      }catch(e){
+        toast("Import failed");
+      }
+    };
+    inp.click();
+  };
+
+  document.getElementById("wipeAll").onclick = ()=>{
+    if(confirm("Wipe everything? This cannot be undone.")){
+      localStorage.removeItem(LS_KEY);
+      state = defaults();
+      save();
+      toast("Wiped");
+      renderAll();
+    }
+  };
+}
+
+function getISOWeekKey(date = new Date()){
+  // returns YYYY-WW
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+  return `${d.getUTCFullYear()}-${String(weekNo).padStart(2,"0")}`;
+}
+
+function renderWeekly(){
+  const wk = getISOWeekKey();
+  const w = state.weekly[wk] || {worked:"", didnt:"", fix:""};
+  document.getElementById("wWorked").value = w.worked || "";
+  document.getElementById("wDidnt").value = w.didnt || "";
+  document.getElementById("wFix").value = w.fix || "";
+
+  document.getElementById("saveWeekly").onclick = ()=>{
+    state.weekly[wk] = {
+      worked: document.getElementById("wWorked").value.trim(),
+      didnt: document.getElementById("wDidnt").value.trim(),
+      fix: document.getElementById("wFix").value.trim(),
+      savedAt: Date.now()
+    };
+    save();
+    document.getElementById("weeklySaved").style.display="block";
+    setTimeout(()=>document.getElementById("weeklySaved").style.display="none", 1000);
+    toast("Weekly saved");
+    renderCal14();
+  };
+
+  renderCal14();
+}
+
+function renderCal14(){
+  const wrap = document.getElementById("cal14");
+  wrap.innerHTML = "";
+  for(let i=0;i<14;i++){
+    const dt = new Date();
+    dt.setDate(dt.getDate()-i);
+    const k = dt.toISOString().slice(0,10);
+    const d = state.day[k];
+    const tracked = d ? (
+      (Object.values(d.checks||{}).some(Boolean)) ||
+      (Number(d.waterL||0)>0) ||
+      (String(d.steps||"").trim()!=="") ||
+      (String(d.sleepH||"").trim()!=="") ||
+      (d.movement && d.movement!=="none")
+    ) : false;
+    const box = document.createElement("div");
+    box.className="check";
+    box.innerHTML = `<label>${k}</label><span class="tag">${tracked ? "tracked ✅" : "—"}</span>`;
+    wrap.appendChild(box);
+  }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+function renderAll(){
+  bindToday();
+  renderKPIs();
+  renderGoals();
+  renderJournal();
+  renderReminders();
+  renderWeekly();
+}
+
+/* ====== Reminders / Notifications (best-effort) ====== */
+const btnNotif = document.getElementById("btnNotif");
+btnNotif.onclick = async () => {
+  if(!("Notification" in window)) return toast("Notifications not supported");
+  if(Notification.permission === "granted") return toast("Already enabled");
+  const p = await Notification.requestPermission();
+  toast(p === "granted" ? "Enabled" : "Not enabled");
+};
+
+function maybeNotify(title, body){
+  if(Notification.permission !== "granted") return;
+  try { new Notification(title, { body }); } catch(e){}
+}
+
+function checkRemindersLoop(){
+  const style = state.reminders.style || "gentle";
+  const d = getDay();
+  const now = new Date();
+  const hhmm = now.toTimeString().slice(0,5);
+
+  // water reminder
+  if(state.reminders.tWater && hhmm === state.reminders.tWater){
+    if(Number(d.waterL||0) < 2){
+      const msg = style==="strict" ? "Log your water now. 1L is enough to win." : "Quick water check — 1L helps.";
+      maybeNotify("Water", msg);
+    }
+  }
+
+  // course reminder
+  if(state.reminders.tCourse && hhmm === state.reminders.tCourse){
+    if(!(d.checks && d.checks.coursera)){
+      const msg = style==="strict" ? "Do 10 minutes Coursera now. Minimum counts." : "Tiny Coursera time? 10 minutes.";
+      maybeNotify("Coursera", msg);
+    }
+  }
+}
+setInterval(checkRemindersLoop, 1000 * 30);
+
+/* ====== PWA (Service Worker) ====== */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+
+/* init */
+renderAll();
+save();
+</script>
+</body>
+</html>
