@@ -56,8 +56,27 @@
 </head>
 
 <body>
+<div id="authBox" style="padding:14px;max-width:420px;margin:20px auto;">
+  <button onclick="loginGoogle()" style="width:100%;padding:12px;margin-bottom:10px;">
+    Continue with Google
+  </button>
+  <input id="emailInput" type="email" placeholder="Email" style="width:100%;padding:10px;margin-bottom:8px;">
+  <button onclick="loginEmail()" style="width:100%;padding:12px;">
+    Continue with Email
+  </button>
+</div>
+  
   <header>
     <h1>Life OS</h1>
+    <div style="margin:16px 0;">
+  <button class="btn" onclick="loginGoogle()">Continue with Google</button>
+</div>
+
+<div style="margin:16px 0;">
+  <input id="emailInput" placeholder="Enter email" />
+  <button class="btn" onclick="loginEmail()">Send login link</button>
+</div>
+
     <div class="sub" id="subline">Today</div>
   </header>
 
@@ -742,6 +761,15 @@ if("serviceWorker" in navigator){
 /* init */
 renderAll();
 save();
+async function loginGoogle() {
+  await supabase.auth.signInWithOAuth({ provider: "google" });
+}
+
+async function loginEmail() {
+  const email = document.getElementById("emailInput").value;
+  if (!email) return alert("Enter email");
+  await supabase.auth.signInWithOtp({ email });
+}  
 </script>
 </body>
 </html>
