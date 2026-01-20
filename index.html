@@ -746,7 +746,7 @@ if("serviceWorker" in navigator){
 renderAll();
 save();
 async function loginGoogle() {
-  await supabase.auth.signInWithOAuth({ provider: "google" });
+  await sb.auth.signInWithOAuth({ provider: "google" });
 }
 
 async function loginEmail() {
@@ -754,7 +754,7 @@ async function loginEmail() {
     const email = document.getElementById("emailInput")?.value?.trim();
     if (!email) return alert("Enter email");
 
-    const { error } = await supabase.auth.signInWithOtp({ email });
+    const { error } = await sb.auth.signInWithOtp({ email });
 
     if (error) return alert("Supabase error: " + error.message);
 
