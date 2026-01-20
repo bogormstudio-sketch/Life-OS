@@ -386,7 +386,7 @@
     const todayKey = () => new Date().toISOString().slice(0,10); // YYYY-MM-DD
 
     // ✅ Create ONLY ONE client (global variable "sb")
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     /********************
      * UI helpers
