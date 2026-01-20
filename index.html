@@ -753,10 +753,20 @@ async function loginGoogle() {
 }
 
 async function loginEmail() {
-  const email = document.getElementById("emailInput").value;
-  if (!email) return alert("Enter email");
-  await supabase.auth.signInWithOtp({ email });
-}  
+  try {
+    const email = document.getElementById("emailInput")?.value?.trim();
+    if (!email) return alert("Enter email");
+
+    const { error } = await supabase.auth.signInWithOtp({ email });
+
+    if (error) return alert("Supabase error: " + error.message);
+
+    alert("Check your email for the login link.");
+  } catch (e) {
+    alert("Code error: " + (e?.message || e));
+  }
+}
+
 </script>
 </body>
 </html>
