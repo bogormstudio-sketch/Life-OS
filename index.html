@@ -1,260 +1,332 @@
 <!doctype html>
 <html lang="en">
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>  
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b0b0f" />
   <title>Life OS</title>
-  <link rel="manifest" href="manifest.json">
+
+  <!-- ✅ Supabase v2 (global = window.supabase) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    :root { --bg:#0b0b0f; --card:#151522; --muted:#a7a7c7; --text:#f2f2ff; --accent:#7c5cff; --ok:#30d158; --warn:#ffd60a; }
-    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
-    header{position:sticky;top:0;background:rgba(11,11,15,.9);backdrop-filter: blur(10px);padding:14px 14px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
-    h1{margin:0;font-size:18px;letter-spacing:.2px}
-    .sub{margin-top:4px;color:var(--muted);font-size:12px}
-    main{padding:14px; padding-bottom:84px; max-width:780px; margin:0 auto}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px;box-shadow:0 12px 30px rgba(0,0,0,.25)}
-    .card h2{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
-    .pill{display:inline-flex;align-items:center;gap:8px;background:rgba(124,92,255,.14);border:1px solid rgba(124,92,255,.35);padding:8px 10px;border-radius:999px;font-size:12px;color:#e9e6ff}
-    .btn{appearance:none;border:0;background:var(--accent);color:white;border-radius:12px;padding:10px 12px;font-weight:600;font-size:13px}
-    .btn.secondary{background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.10)}
-    .btn.danger{background:rgba(255,59,48,.15);border:1px solid rgba(255,59,48,.35);color:#ffd6d3}
-    .btn.small{padding:8px 10px;border-radius:10px;font-size:12px}
-    .grid{display:grid;gap:10px}
-    @media (min-width:720px){ .grid.two{grid-template-columns:1fr 1fr} .grid.three{grid-template-columns:1fr 1fr 1fr} }
-    .check{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
-    .check label{display:flex;align-items:center;gap:10px;font-size:13px}
-    input[type="checkbox"]{width:18px;height:18px}
-    input[type="text"], input[type="number"], textarea, select, input[type="time"]{
-      width:100%; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
-      color:var(--text); border-radius:12px; padding:10px 12px; font-size:13px; outline:none
+    :root{
+      --bg:#0b0b0f;
+      --card:#151522;
+      --muted:#a7a7c7;
+      --text:#f2f2ff;
+      --accent:#6c5ce7;
+      --border:rgba(255,255,255,.08);
+      --soft:rgba(255,255,255,.06);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --radius2:12px;
+      --pad:14px;
+      --max:820px;
     }
-    textarea{min-height:92px; resize:vertical}
-    .muted{color:var(--muted);font-size:12px}
-    .kpi{display:flex;gap:10px;flex-wrap:wrap}
-    .kpi .box{flex:1;min-width:120px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:12px}
-    .kpi .num{font-size:18px;font-weight:800}
-    .kpi .lbl{font-size:12px;color:var(--muted);margin-top:3px}
-    nav{position:fixed;left:0;right:0;bottom:0;background:rgba(11,11,15,.92);backdrop-filter: blur(10px);
-      border-top:1px solid rgba(255,255,255,.06); padding:10px 10px}
-    .tabs{display:flex;gap:8px;max-width:780px;margin:0 auto}
-    .tab{flex:1;text-align:center;padding:10px 8px;border-radius:14px;font-size:12px;color:var(--muted);border:1px solid rgba(255,255,255,.06)}
-    .tab.active{color:var(--text);background:rgba(124,92,255,.16);border-color:rgba(124,92,255,.35)}
-    .hide{display:none}
-    .sep{height:1px;background:rgba(255,255,255,.06);margin:12px 0}
-    .tag{font-size:11px;color:var(--muted)}
-    .goal{padding:12px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
-    .goal .t{font-weight:700;font-size:13px}
-    .goal .d{color:var(--muted);font-size:12px;margin-top:4px}
-    .goal .a{margin-top:8px;font-size:12px}
-    .right{display:flex;gap:8px;align-items:center}
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:86px;background:rgba(21,21,34,.98);
-      border:1px solid rgba(255,255,255,.10); padding:10px 12px;border-radius:999px;font-size:12px;color:var(--text);display:none}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(108,92,231,.18), transparent 60%),
+                  radial-gradient(900px 500px at 80% 10%, rgba(255,255,255,.07), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,11,15,.78);
+      border-bottom:1px solid var(--border);
+    }
+    .wrap{max-width:var(--max); margin:0 auto; padding:14px;}
+    h1{margin:0; font-size:18px; letter-spacing:.2px;}
+    .sub{color:var(--muted); font-size:12px; margin-top:4px}
+    .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+    .spacer{flex:1}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      color:var(--muted); font-size:12px;
+    }
+
+    main{padding:14px; padding-bottom:88px;}
+    .grid{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
+    @media (max-width: 760px){ .grid{grid-template-columns:1fr;} }
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--pad);
+      box-shadow: var(--shadow);
+    }
+    .card h2{
+      margin:0 0 10px 0;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:700;
+      letter-spacing:.2px;
+      text-transform: uppercase;
+    }
+
+    input, select, textarea{
+      width:100%;
+      background: rgba(255,255,255,.05);
+      border:1px solid var(--border);
+      color:var(--text);
+      border-radius: 12px;
+      padding: 12px;
+      outline:none;
+    }
+    input::placeholder, textarea::placeholder{color:rgba(242,242,255,.45)}
+    textarea{min-height:120px; resize:vertical}
+
+    .btn{
+      appearance:none;
+      border:0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: var(--accent);
+      color:white;
+      font-weight:700;
+      cursor:pointer;
+      width:100%;
+    }
+    .btn.secondary{
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      border:1px solid var(--border);
+      font-weight:600;
+    }
+    .btn.small{width:auto; padding:8px 10px; border-radius:999px; font-weight:600; font-size:12px}
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+
+    .checkrow{
+      display:flex; align-items:center; gap:10px;
+      padding:10px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      margin-bottom:10px;
+    }
+    .checkrow input[type="checkbox"]{width:18px; height:18px; margin:0}
+    .checkrow .meta{margin-left:auto; color:var(--muted); font-size:12px}
+
+    nav{
+      position:fixed; left:0; right:0; bottom:0; z-index:20;
+      background: rgba(11,11,15,.88);
+      border-top:1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+    .tabs{
+      max-width:var(--max);
+      margin:0 auto;
+      display:flex;
+      gap:8px;
+      padding:10px 14px;
+      justify-content:space-between;
+    }
+    .tab{
+      flex:1;
+      text-align:center;
+      padding:10px 8px;
+      border-radius: 14px;
+      color: var(--muted);
+      border:1px solid transparent;
+      cursor:pointer;
+      user-select:none;
+      font-size:12px;
+      background: transparent;
+    }
+    .tab.active{
+      background: rgba(108,92,231,.18);
+      border-color: rgba(108,92,231,.35);
+      color: var(--text);
+    }
+
+    /* Auth overlay */
+    .overlay{
+      position:fixed; inset:0; z-index:50;
+      display:none;
+      align-items:center; justify-content:center;
+      background: rgba(0,0,0,.55);
+      padding:16px;
+    }
+    .overlay.show{display:flex}
+    .authbox{
+      width:min(520px, 100%);
+      background: rgba(21,21,34,.98);
+      border:1px solid var(--border);
+      border-radius: 18px;
+      padding:16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    .authbox h3{margin:0 0 8px 0}
+    .authbox p{margin:0 0 12px 0; color:var(--muted); font-size:13px}
+    .authrow{display:grid; grid-template-columns: 1fr; gap:10px}
+    .tiny{font-size:12px; color:var(--muted); margin-top:10px}
+
+    .toast{
+      position:fixed; left:50%; transform:translateX(-50%);
+      bottom:86px;
+      background: rgba(21,21,34,.96);
+      border:1px solid var(--border);
+      padding:10px 12px;
+      border-radius:999px;
+      font-size:12px;
+      color:var(--text);
+      display:none;
+      z-index:60;
+      max-width:90vw;
+      box-shadow: var(--shadow);
+    }
   </style>
 </head>
 
 <body>
-  
   <header>
-  <div id="authBox" style="padding:14px;max-width:420px;margin:12px auto;">
-  <input id="emailInput" type="email" placeholder="Enter email" style="width:100%;padding:12px;margin-bottom:10px;" />
-  <button class="btn" onclick="loginEmail();" style="width:100%;">Continue with Email</button>
-</div>  
-    <h1>Life OS</h1>
-    <div class="sub" id="subline">Today</div>
+    <div class="wrap">
+      <div class="row">
+        <div>
+          <h1>Life OS</h1>
+          <div class="sub" id="subline">Today</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="pill" id="userPill">Not signed in</div>
+        <button class="btn small secondary" id="btnSignOut" style="display:none;">Sign out</button>
+      </div>
+    </div>
   </header>
 
-  <main>
-    
+  <main class="wrap">
+
     <!-- TODAY -->
     <section id="screen-today">
-      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <span class="pill" id="datePill">—</span>
-        <div class="right">
-          <button class="btn small secondary" id="btnLowEnergy">Low-energy mode</button>
-          <button class="btn small secondary" id="btnNotif">Enable reminders</button>
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:10px;">
+      <div class="card" style="margin-bottom:12px;">
         <h2>What matters today (max 10 words)</h2>
-        <input id="focusLine" type="text" placeholder="Example: Salah + water + 10 min course" maxlength="80" />
-        <div class="muted" style="margin-top:8px;">Tip: keep it short so you don’t overthink.</div>
+        <input id="focusLine" placeholder="Example: Salah + water + 10 min course" maxlength="80" />
+        <div class="tiny">Tip: keep it short so you don’t overthink.</div>
       </div>
 
-      <div class="grid two">
+      <div class="grid">
         <div class="card">
           <h2>IBADAH (Fard first)</h2>
-          <div class="grid">
-            <div class="check"><label><input type="checkbox" data-key="salah5"> 5 Salah</label><span class="tag">must</span></div>
-            <div class="check"><label><input type="checkbox" data-key="tasbeeh"> Tasbeehat</label><span class="tag">daily</span></div>
-            <div class="check"><label><input type="checkbox" data-key="quranMin"> Quran (min)</label><span class="tag">min 1 page</span></div>
-            <div class="sep"></div>
-            <div class="check"><label><input type="checkbox" data-key="tahajjud"> Tahajjud</label><span class="tag">bonus</span></div>
-            <div class="check"><label><input type="checkbox" data-key="ishraq"> Ishraq</label><span class="tag">bonus</span></div>
-          </div>
+          <label class="checkrow">
+            <input type="checkbox" data-check="salah">
+            <div>5 Salah</div>
+            <div class="meta">must</div>
+          </label>
+          <label class="checkrow">
+            <input type="checkbox" data-check="tasbeeh">
+            <div>Tasbeehat</div>
+            <div class="meta">daily</div>
+          </label>
+          <label class="checkrow">
+            <input type="checkbox" data-check="quran">
+            <div>Quran (min)</div>
+            <div class="meta">min 1 page</div>
+          </label>
+
+          <div style="height:8px"></div>
+
+          <label class="checkrow">
+            <input type="checkbox" data-check="tahajjud">
+            <div>Tahajjud</div>
+            <div class="meta">bonus</div>
+          </label>
+          <label class="checkrow">
+            <input type="checkbox" data-check="ishraq">
+            <div>Ishraq</div>
+            <div class="meta">bonus</div>
+          </label>
         </div>
 
         <div class="card">
           <h2>BODY</h2>
-          <div class="grid">
-            <div class="check">
-              <label>Water (L)</label>
-              <div class="right">
-                <button class="btn small secondary" id="waterMinus">-</button>
-                <div class="num" id="waterVal">0</div>
-                <button class="btn small secondary" id="waterPlus">+</button>
+
+          <div class="row" style="margin-bottom:10px;">
+            <div style="flex:1">
+              <div class="pill" style="width:100%; justify-content:space-between;">
+                <span>Water (L)</span>
+                <span id="waterVal">0</span>
               </div>
             </div>
-
-            <div class="check">
-              <label>Steps</label>
-              <input type="number" id="stepsVal" inputmode="numeric" placeholder="15000" />
-            </div>
-
-            <div class="check">
-              <label>Sleep (hours)</label>
-              <input type="number" id="sleepVal" inputmode="decimal" placeholder="9" step="0.25" />
-            </div>
-
-            <div class="check">
-              <label>Movement</label>
-              <select id="moveVal">
-                <option value="none">Not yet</option>
-                <option value="min">Minimum (5–10 min)</option>
-                <option value="full">Full (walk/gym/stretch)</option>
-              </select>
-            </div>
+            <button class="btn small secondary" id="waterMinus">-</button>
+            <button class="btn small secondary" id="waterPlus">+</button>
           </div>
-        </div>
-      </div>
 
-      <div class="card" style="margin-top:10px;">
-        <h2>BUILD (Career / Brand)</h2>
-        <div class="grid">
-          <div class="check"><label><input type="checkbox" data-key="coursera"> Coursera (min 10 min)</label><span class="tag">min counts</span></div>
-          <div class="check"><label><input type="checkbox" data-key="bakingOrCafe"> Baking / café prep</label><span class="tag">create</span></div>
-          <div class="check"><label><input type="checkbox" data-key="igAction"> IG action (post/story/idea)</label><span class="tag">share</span></div>
-        </div>
-      </div>
+          <div style="margin-bottom:10px;">
+            <div class="sub" style="margin-bottom:6px;">Steps</div>
+            <input id="steps" type="number" min="0" placeholder="15000" />
+          </div>
 
-      <div class="card" style="margin-top:10px;">
-        <h2>Quick stats</h2>
-        <div class="kpi">
-          <div class="box"><div class="num" id="kpiDone">0/0</div><div class="lbl">Today done</div></div>
-          <div class="box"><div class="num" id="kpiWater">0/3</div><div class="lbl">Water goal (3L)</div></div>
-          <div class="box"><div class="num" id="kpiStreak">0</div><div class="lbl">Tracking streak</div></div>
+          <div style="margin-bottom:10px;">
+            <div class="sub" style="margin-bottom:6px;">Sleep (hours)</div>
+            <input id="sleep" type="number" min="0" step="0.5" placeholder="8" />
+          </div>
+
+          <div>
+            <div class="sub" style="margin-bottom:6px;">Movement</div>
+            <select id="movement">
+              <option value="">Not yet</option>
+              <option value="walk">Walk</option>
+              <option value="gym">Gym</option>
+              <option value="stretch">Stretch</option>
+              <option value="sports">Sports</option>
+            </select>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- GOALS -->
-    <section id="screen-goals" class="hide">
-      <div class="grid two">
-        <div class="card">
-          <h2>Short-term goals (2.5 months)</h2>
-          <div id="shortGoals" class="grid"></div>
-          <div class="sep"></div>
-          <div class="grid">
-            <input id="sgTitle" type="text" placeholder="Goal title (short-term)" />
-            <input id="sgDeadline" type="text" placeholder="Deadline (e.g., Apr 5)" />
-            <input id="sgNext" type="text" placeholder="Next tiny action (important)" />
-            <button class="btn" id="addShort">Add short-term goal</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>Long-term goals</h2>
-          <div id="longGoals" class="grid"></div>
-          <div class="sep"></div>
-          <div class="grid">
-            <input id="lgTitle" type="text" placeholder="Goal title (long-term)" />
-            <input id="lgWhy" type="text" placeholder="Why it matters (1 line)" />
-            <button class="btn" id="addLong">Add long-term goal</button>
-          </div>
-        </div>
+    <section id="screen-goals" style="display:none;">
+      <div class="card">
+        <h2>Goals</h2>
+        <textarea id="goalsText" placeholder="Write 1–3 goals. Keep them simple."></textarea>
+        <div style="height:10px"></div>
+        <button class="btn secondary" id="saveGoals">Save</button>
       </div>
     </section>
 
     <!-- JOURNAL -->
-    <section id="screen-journal" class="hide">
+    <section id="screen-journal" style="display:none;">
       <div class="card">
-        <h2>Daily journal (30–60 seconds)</h2>
-        <div class="grid">
-          <textarea id="jDid" placeholder="Today I did…"></textarea>
-          <textarea id="jStruggle" placeholder="Today I struggled with…"></textarea>
-          <textarea id="jWin" placeholder="One small win…"></textarea>
-          <button class="btn" id="saveJournal">Save journal</button>
-          <div class="muted" id="journalSaved" style="display:none;">Saved.</div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:10px;">
-        <h2>Recent entries</h2>
-        <div class="muted">Tap any date to view.</div>
-        <div id="journalList" class="grid" style="margin-top:10px;"></div>
+        <h2>Journal</h2>
+        <textarea id="journalText" placeholder="Quick thoughts. What worked / what didn’t?"></textarea>
+        <div style="height:10px"></div>
+        <button class="btn secondary" id="saveJournal">Save</button>
       </div>
     </section>
 
     <!-- REMINDERS -->
-    <section id="screen-reminders" class="hide">
+    <section id="screen-reminders" style="display:none;">
       <div class="card">
-        <h2>Reminders (simple + effective)</h2>
-        <div class="muted">Note: true background reminders depend on your phone/browser. This app will remind when open; notifications can work if allowed.</div>
-        <div class="sep"></div>
-        <div class="grid">
-          <label class="muted">Reminder style</label>
-          <select id="reminderStyle">
-            <option value="gentle">Gentle</option>
-            <option value="strict">Strict</option>
-          </select>
-
-          <label class="muted">Times (optional)</label>
-          <div class="grid two">
-            <input type="time" id="tWater" />
-            <input type="time" id="tCourse" />
-          </div>
-          <div class="muted">Left: water check, Right: course check</div>
-
-          <button class="btn" id="saveReminders">Save reminders</button>
+        <h2>Reminders</h2>
+        <div class="row" style="gap:10px;">
+          <button class="btn secondary" id="btnLowEnergy">Low-energy mode</button>
+          <button class="btn secondary" id="btnEnableNotifs">Enable reminders</button>
         </div>
-      </div>
-
-      <div class="card" style="margin-top:10px;">
-        <h2>Reset / backup</h2>
-        <div class="grid two">
-          <button class="btn secondary" id="exportData">Export data</button>
-          <button class="btn secondary" id="importData">Import data</button>
-        </div>
-        <div class="sep"></div>
-        <button class="btn danger" id="wipeAll">Wipe everything</button>
+        <div class="tiny" id="notifHint" style="margin-top:10px;"></div>
       </div>
     </section>
 
     <!-- WEEKLY -->
-    <section id="screen-weekly" class="hide">
+    <section id="screen-weekly" style="display:none;">
       <div class="card">
-        <h2>Weekly reset (10 minutes)</h2>
-        <div class="grid">
-          <textarea id="wWorked" placeholder="What worked this week?"></textarea>
-          <textarea id="wDidnt" placeholder="What didn’t work?"></textarea>
-          <textarea id="wFix" placeholder="ONE fix for next week"></textarea>
-          <button class="btn" id="saveWeekly">Save weekly reset</button>
-          <div class="muted" id="weeklySaved" style="display:none;">Saved.</div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:10px;">
-        <h2>Tracking calendar (last 14 days)</h2>
-        <div id="cal14" class="grid two" style="margin-top:10px;"></div>
+        <h2>Weekly</h2>
+        <textarea id="weeklyText" placeholder="What worked? What didn’t? What to fix next week?"></textarea>
+        <div style="height:10px"></div>
+        <button class="btn secondary" id="saveWeekly">Save</button>
       </div>
     </section>
 
-    <div class="toast" id="toast">Saved</div>
   </main>
 
+  <!-- Bottom tabs -->
   <nav>
     <div class="tabs">
       <div class="tab active" data-tab="today">Today</div>
@@ -265,505 +337,312 @@
     </div>
   </nav>
 
-<script>
-const SUPABASE_URL = "https://ogatcgdefwelciohqhsy.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_lW_rK73SLbZyb_sHRD562g_TJydjNI_";
+  <!-- Auth overlay -->
+  <div class="overlay" id="authOverlay">
+    <div class="authbox">
+      <h3>Sign in</h3>
+      <p>Use Google or email link. (One-time sign-in.)</p>
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  
-/* ========= Life OS v1 (local-first) ========= */
-const LS_KEY = "life_os_v1";
-const todayKey = () => new Date().toISOString().slice(0,10); // YYYY-MM-DD
+      <div class="authrow">
+        <button class="btn" id="btnGoogle">Continue with Google</button>
 
-const defaults = () => ({
-  meta: {
-    createdAt: Date.now(),
-    lastOpen: Date.now(),
-    trackingStreak: 0,
-    lastTrackedDay: null,
-    lowEnergy: false
-  },
-  day: {}, // day[YYYY-MM-DD] = { checks:{}, waterL, steps, sleepH, movement, focusLine }
-  goals: { short: [], long: [] },
-  journal: {}, // journal[YYYY-MM-DD] = { did, struggle, win, savedAt }
-  weekly: {}, // weekly[YYYY-WW] = { worked, didnt, fix, savedAt }
-  reminders: { style: "gentle", tWater: "", tCourse: "" }
-});
+        <input id="emailInput" type="email" placeholder="Enter email" />
+        <button class="btn secondary" id="btnEmail">Continue with Email</button>
+      </div>
 
-let state = load();
+      <div class="tiny" id="authMsg"></div>
+    </div>
+  </div>
 
-function load(){
-  try{
-    const raw = localStorage.getItem(LS_KEY);
-    if(!raw) return defaults();
-    const s = JSON.parse(raw);
-    return {...defaults(), ...s, meta:{...defaults().meta, ...(s.meta||{})}};
-  }catch(e){
-    return defaults();
-  }
-}
-function save(){
-  state.meta.lastOpen = Date.now();
-  localStorage.setItem(LS_KEY, JSON.stringify(state));
-}
-function toast(msg){
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.style.display = "block";
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(()=> t.style.display="none", 1400);
-}
+  <div class="toast" id="toast"></div>
 
-function getDay(){
-  const k = todayKey();
-  if(!state.day[k]) state.day[k] = {
-    checks: {},
-    waterL: 0,
-    steps: "",
-    sleepH: "",
-    movement: "none",
-    focusLine: ""
-  };
-  return state.day[k];
-}
+  <script>
+    /********************
+     * CONFIG
+     ********************/
+    // ✅ Put your real Supabase project details here
+    const SUPABASE_URL = "PASTE_YOUR_SUPABASE_URL";
+    const SUPABASE_ANON_KEY = "PASTE_YOUR_SUPABASE_ANON_KEY";
 
-function updateStreakIfTracked(){
-  const k = todayKey();
-  const d = getDay();
-  const tracked = (Object.values(d.checks||{}).some(Boolean)) ||
-                  (Number(d.waterL||0)>0) ||
-                  (String(d.steps||"").trim()!=="") ||
-                  (String(d.sleepH||"").trim()!=="") ||
-                  (d.movement && d.movement!=="none") ||
-                  (String(d.focusLine||"").trim()!=="");
-  if(!tracked) return;
+    // Local storage keys
+    const LS_KEY = "life_os_v2";
+    const todayKey = () => new Date().toISOString().slice(0,10); // YYYY-MM-DD
 
-  const last = state.meta.lastTrackedDay;
-  if(last === k) return;
+    // ✅ Create ONLY ONE client (global variable "sb")
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // difference in days
-  if(last){
-    const a = new Date(last);
-    const b = new Date(k);
-    const diff = Math.round((b - a)/(1000*60*60*24));
-    if(diff === 1) state.meta.trackingStreak = (state.meta.trackingStreak||0)+1;
-    else state.meta.trackingStreak = 1;
-  } else {
-    state.meta.trackingStreak = 1;
-  }
-  state.meta.lastTrackedDay = k;
-}
-
-/* ====== UI bindings ====== */
-const screens = {
-  today: document.getElementById("screen-today"),
-  goals: document.getElementById("screen-goals"),
-  journal: document.getElementById("screen-journal"),
-  reminders: document.getElementById("screen-reminders"),
-  weekly: document.getElementById("screen-weekly"),
-};
-const subline = document.getElementById("subline");
-
-document.querySelectorAll(".tab").forEach(t=>{
-  t.addEventListener("click", ()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-    t.classList.add("active");
-    const tab = t.dataset.tab;
-    Object.keys(screens).forEach(k=>screens[k].classList.add("hide"));
-    screens[tab].classList.remove("hide");
-    subline.textContent = tab[0].toUpperCase()+tab.slice(1);
-    renderAll();
-  });
-});
-
-function bindToday(){
-  document.getElementById("datePill").textContent = new Date().toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric"});
-  const d = getDay();
-
-  // focus
-  const focus = document.getElementById("focusLine");
-  focus.value = d.focusLine || "";
-  focus.oninput = () => { d.focusLine = focus.value; save(); updateStreakIfTracked(); renderKPIs(); };
-
-  // checks
-  document.querySelectorAll('input[type="checkbox"][data-key]').forEach(cb=>{
-    const key = cb.dataset.key;
-    cb.checked = !!(d.checks && d.checks[key]);
-    cb.onchange = () => {
-      d.checks[key] = cb.checked;
-      save(); updateStreakIfTracked(); renderKPIs();
-    };
-  });
-
-  // water
-  document.getElementById("waterVal").textContent = d.waterL || 0;
-  document.getElementById("waterPlus").onclick = () => {
-    d.waterL = Math.min(10, Number(d.waterL||0)+1);
-    save(); updateStreakIfTracked(); renderKPIs(); bindToday();
-  };
-  document.getElementById("waterMinus").onclick = () => {
-    d.waterL = Math.max(0, Number(d.waterL||0)-1);
-    save(); updateStreakIfTracked(); renderKPIs(); bindToday();
-  };
-
-  // steps/sleep/move
-  const steps = document.getElementById("stepsVal");
-  steps.value = d.steps || "";
-  steps.oninput = () => { d.steps = steps.value; save(); updateStreakIfTracked(); renderKPIs(); };
-
-  const sleep = document.getElementById("sleepVal");
-  sleep.value = d.sleepH || "";
-  sleep.oninput = () => { d.sleepH = sleep.value; save(); updateStreakIfTracked(); renderKPIs(); };
-
-  const move = document.getElementById("moveVal");
-  move.value = d.movement || "none";
-  move.onchange = () => { d.movement = move.value; save(); updateStreakIfTracked(); renderKPIs(); };
-
-  // low energy mode toggle
-  const btnLow = document.getElementById("btnLowEnergy");
-  btnLow.textContent = state.meta.lowEnergy ? "Low-energy: ON" : "Low-energy mode";
-  btnLow.onclick = () => {
-    state.meta.lowEnergy = !state.meta.lowEnergy;
-    save();
-    renderAll();
-    toast(state.meta.lowEnergy ? "Low-energy ON" : "Low-energy OFF");
-  };
-}
-
-function renderKPIs(){
-  const d = getDay();
-  const keys = Array.from(document.querySelectorAll('input[type="checkbox"][data-key]')).map(x=>x.dataset.key);
-  const done = keys.filter(k=>d.checks && d.checks[k]).length;
-  const total = keys.length;
-
-  document.getElementById("kpiDone").textContent = `${done}/${total}`;
-  document.getElementById("kpiWater").textContent = `${Number(d.waterL||0)}/3`;
-  document.getElementById("kpiStreak").textContent = String(state.meta.trackingStreak||0);
-
-  // Low-energy mode: visually de-emphasize bonuses
-  const bonusKeys = ["tahajjud","ishraq"];
-  document.querySelectorAll('input[type="checkbox"][data-key]').forEach(cb=>{
-    const wrap = cb.closest(".check");
-    if(state.meta.lowEnergy && bonusKeys.includes(cb.dataset.key)){
-      wrap.style.opacity = 0.5;
-    } else {
-      wrap.style.opacity = 1;
+    /********************
+     * UI helpers
+     ********************/
+    const $ = (id) => document.getElementById(id);
+    const toastEl = $("toast");
+    function toast(msg){
+      toastEl.textContent = msg;
+      toastEl.style.display = "block";
+      clearTimeout(toastEl._t);
+      toastEl._t = setTimeout(()=> toastEl.style.display="none", 2200);
     }
-  });
-}
 
-function renderGoals(){
-  const sg = document.getElementById("shortGoals");
-  const lg = document.getElementById("longGoals");
-  sg.innerHTML = "";
-  lg.innerHTML = "";
+    function setSubline(){
+      const d = new Date();
+      const opts = { weekday:"long", month:"short", day:"numeric" };
+      $("subline").textContent = d.toLocaleDateString(undefined, opts);
+    }
 
-  state.goals.short.forEach((g, idx)=>{
-    const el = document.createElement("div");
-    el.className = "goal";
-    el.innerHTML = `
-      <div class="t">${escapeHtml(g.title||"")}</div>
-      <div class="d">Deadline: ${escapeHtml(g.deadline||"")}</div>
-      <div class="a"><span class="muted">Next action:</span> ${escapeHtml(g.next||"")}</div>
-      <div class="row" style="margin-top:10px;justify-content:space-between;">
-        <button class="btn small secondary" data-act="done">Mark done</button>
-        <button class="btn small danger" data-act="del">Delete</button>
-      </div>
-    `;
-    el.querySelector('[data-act="done"]').onclick = ()=>{
-      state.goals.short[idx].done = true;
-      toast("Marked done");
-      save();
-      // move to bottom
-      state.goals.short.push(state.goals.short.splice(idx,1)[0]);
-      renderGoals();
-    };
-    el.querySelector('[data-act="del"]').onclick = ()=>{
-      state.goals.short.splice(idx,1);
-      save(); renderGoals(); toast("Deleted");
-    };
-    if(g.done) el.style.opacity = 0.55;
-    sg.appendChild(el);
-  });
+    /********************
+     * Local state
+     ********************/
+    function defaults(){
+      return {
+        meta: {
+          createdAt: Date.now(),
+          lastOpen: Date.now(),
+          lowEnergy: false
+        },
+        day: {},        // day[YYYY-MM-DD] = { checks:{}, water, steps, sleep, movement, focusLine }
+        goals: "",
+        journal: {},    // journal[YYYY-MM-DD] = "..."
+        weekly: ""      // simple placeholder
+      };
+    }
 
-  state.goals.long.forEach((g, idx)=>{
-    const el = document.createElement("div");
-    el.className = "goal";
-    el.innerHTML = `
-      <div class="t">${escapeHtml(g.title||"")}</div>
-      <div class="d">${escapeHtml(g.why||"")}</div>
-      <div class="row" style="margin-top:10px;justify-content:flex-end;">
-        <button class="btn small danger" data-act="del">Delete</button>
-      </div>
-    `;
-    el.querySelector('[data-act="del"]').onclick = ()=>{
-      state.goals.long.splice(idx,1);
-      save(); renderGoals(); toast("Deleted");
-    };
-    lg.appendChild(el);
-  });
-
-  document.getElementById("addShort").onclick = ()=>{
-    const title = document.getElementById("sgTitle").value.trim();
-    const deadline = document.getElementById("sgDeadline").value.trim();
-    const next = document.getElementById("sgNext").value.trim();
-    if(!title) return toast("Add a title");
-    state.goals.short.unshift({title, deadline, next, done:false, createdAt:Date.now()});
-    document.getElementById("sgTitle").value="";
-    document.getElementById("sgDeadline").value="";
-    document.getElementById("sgNext").value="";
-    save(); renderGoals(); toast("Added");
-  };
-
-  document.getElementById("addLong").onclick = ()=>{
-    const title = document.getElementById("lgTitle").value.trim();
-    const why = document.getElementById("lgWhy").value.trim();
-    if(!title) return toast("Add a title");
-    state.goals.long.unshift({title, why, createdAt:Date.now()});
-    document.getElementById("lgTitle").value="";
-    document.getElementById("lgWhy").value="";
-    save(); renderGoals(); toast("Added");
-  };
-}
-
-function renderJournal(){
-  const k = todayKey();
-  const j = state.journal[k] || {did:"", struggle:"", win:""};
-  document.getElementById("jDid").value = j.did || "";
-  document.getElementById("jStruggle").value = j.struggle || "";
-  document.getElementById("jWin").value = j.win || "";
-
-  document.getElementById("saveJournal").onclick = ()=>{
-    state.journal[k] = {
-      did: document.getElementById("jDid").value.trim(),
-      struggle: document.getElementById("jStruggle").value.trim(),
-      win: document.getElementById("jWin").value.trim(),
-      savedAt: Date.now()
-    };
-    save();
-    updateStreakIfTracked();
-    document.getElementById("journalSaved").style.display="block";
-    setTimeout(()=>document.getElementById("journalSaved").style.display="none", 1000);
-    toast("Journal saved");
-    renderJournalList();
-  };
-
-  renderJournalList();
-}
-
-function renderJournalList(){
-  const list = document.getElementById("journalList");
-  list.innerHTML = "";
-  const keys = Object.keys(state.journal).sort().reverse().slice(0,14);
-  if(keys.length===0){
-    const m = document.createElement("div");
-    m.className="muted";
-    m.textContent="No entries yet.";
-    list.appendChild(m);
-    return;
-  }
-  keys.forEach(k=>{
-    const el = document.createElement("div");
-    el.className="check";
-    el.style.cursor="pointer";
-    el.innerHTML = `<label>${k}</label><span class="tag">view</span>`;
-    el.onclick = ()=>{
-      const j = state.journal[k];
-      alert(`${k}\n\nDid: ${j.did||"-"}\n\nStruggled: ${j.struggle||"-"}\n\nWin: ${j.win||"-"}`);
-    };
-    list.appendChild(el);
-  });
-}
-
-function renderReminders(){
-  document.getElementById("reminderStyle").value = state.reminders.style || "gentle";
-  document.getElementById("tWater").value = state.reminders.tWater || "";
-  document.getElementById("tCourse").value = state.reminders.tCourse || "";
-
-  document.getElementById("saveReminders").onclick = ()=>{
-    state.reminders.style = document.getElementById("reminderStyle").value;
-    state.reminders.tWater = document.getElementById("tWater").value;
-    state.reminders.tCourse = document.getElementById("tCourse").value;
-    save();
-    toast("Reminders saved");
-  };
-
-  document.getElementById("exportData").onclick = ()=>{
-    const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "life_os_backup.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  document.getElementById("importData").onclick = async ()=>{
-    const inp = document.createElement("input");
-    inp.type = "file";
-    inp.accept = "application/json";
-    inp.onchange = async () => {
-      const file = inp.files[0];
-      if(!file) return;
-      const text = await file.text();
+    function load(){
       try{
-        const obj = JSON.parse(text);
-        state = {...defaults(), ...obj};
-        save();
-        toast("Imported");
-        renderAll();
+        return JSON.parse(localStorage.getItem(LS_KEY)) || defaults();
       }catch(e){
-        toast("Import failed");
+        return defaults();
       }
-    };
-    inp.click();
-  };
+    }
+    let state = load();
 
-  document.getElementById("wipeAll").onclick = ()=>{
-    if(confirm("Wipe everything? This cannot be undone.")){
-      localStorage.removeItem(LS_KEY);
-      state = defaults();
+    function save(){
+      state.meta.lastOpen = Date.now();
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+    }
+
+    function ensureDay(){
+      const k = todayKey();
+      if(!state.day[k]){
+        state.day[k] = {
+          checks: {},
+          water: 0,
+          steps: "",
+          sleep: "",
+          movement: "",
+          focusLine: ""
+        };
+      }
+      return state.day[k];
+    }
+
+    /********************
+     * Tabs
+     ********************/
+    const screens = ["today","goals","journal","reminders","weekly"];
+    function showTab(name){
+      screens.forEach(s=>{
+        const sec = $("screen-" + s);
+        sec.style.display = (s === name) ? "block" : "none";
+      });
+      document.querySelectorAll(".tab").forEach(t=>{
+        t.classList.toggle("active", t.dataset.tab === name);
+      });
+    }
+    document.querySelectorAll(".tab").forEach(t=>{
+      t.addEventListener("click", ()=> showTab(t.dataset.tab));
+    });
+
+    /********************
+     * Render + bind
+     ********************/
+    function renderToday(){
+      const d = ensureDay();
+
+      $("focusLine").value = d.focusLine || "";
+      $("waterVal").textContent = String(d.water || 0);
+      $("steps").value = d.steps ?? "";
+      $("sleep").value = d.sleep ?? "";
+      $("movement").value = d.movement ?? "";
+
+      document.querySelectorAll('input[type="checkbox"][data-check]').forEach(cb=>{
+        const key = cb.getAttribute("data-check");
+        cb.checked = !!(d.checks && d.checks[key]);
+      });
+
+      // low energy mode UI
+      $("btnLowEnergy").textContent = state.meta.lowEnergy ? "Low-energy: ON" : "Low-energy: OFF";
+    }
+
+    function renderTextAreas(){
+      $("goalsText").value = state.goals || "";
+      $("journalText").value = state.journal[todayKey()] || "";
+      $("weeklyText").value = state.weekly || "";
+    }
+
+    function bindInputs(){
+      $("focusLine").addEventListener("input", (e)=>{
+        ensureDay().focusLine = e.target.value.trim();
+        save();
+      });
+
+      document.querySelectorAll('input[type="checkbox"][data-check]').forEach(cb=>{
+        cb.addEventListener("change", ()=>{
+          const d = ensureDay();
+          const key = cb.getAttribute("data-check");
+          d.checks[key] = cb.checked;
+          save();
+        });
+      });
+
+      $("waterPlus").addEventListener("click", ()=>{
+        const d = ensureDay();
+        d.water = Math.min(20, (d.water || 0) + 1);
+        $("waterVal").textContent = String(d.water);
+        save();
+      });
+      $("waterMinus").addEventListener("click", ()=>{
+        const d = ensureDay();
+        d.water = Math.max(0, (d.water || 0) - 1);
+        $("waterVal").textContent = String(d.water);
+        save();
+      });
+
+      $("steps").addEventListener("input", (e)=>{
+        ensureDay().steps = e.target.value;
+        save();
+      });
+      $("sleep").addEventListener("input", (e)=>{
+        ensureDay().sleep = e.target.value;
+        save();
+      });
+      $("movement").addEventListener("change", (e)=>{
+        ensureDay().movement = e.target.value;
+        save();
+      });
+
+      $("saveGoals").addEventListener("click", ()=>{
+        state.goals = $("goalsText").value.trim();
+        save();
+        toast("Goals saved");
+      });
+      $("saveJournal").addEventListener("click", ()=>{
+        state.journal[todayKey()] = $("journalText").value.trim();
+        save();
+        toast("Journal saved");
+      });
+      $("saveWeekly").addEventListener("click", ()=>{
+        state.weekly = $("weeklyText").value.trim();
+        save();
+        toast("Weekly saved");
+      });
+
+      $("btnLowEnergy").addEventListener("click", ()=>{
+        state.meta.lowEnergy = !state.meta.lowEnergy;
+        save();
+        renderToday();
+        toast(state.meta.lowEnergy ? "Low-energy ON" : "Low-energy OFF");
+      });
+
+      $("btnEnableNotifs").addEventListener("click", async ()=>{
+        if(!("Notification" in window)){
+          $("notifHint").textContent = "Notifications not supported in this browser.";
+          return;
+        }
+        const perm = await Notification.requestPermission();
+        $("notifHint").textContent = (perm === "granted")
+          ? "Notifications enabled ✅"
+          : "Notifications blocked. You can enable it from browser settings.";
+      });
+    }
+
+    /********************
+     * AUTH
+     ********************/
+    function showAuth(show){
+      $("authOverlay").classList.toggle("show", !!show);
+    }
+
+    async function refreshAuthUI(){
+      const { data } = await sb.auth.getSession();
+      const session = data?.session;
+
+      if(session?.user){
+        const email = session.user.email || "Signed in";
+        $("userPill").textContent = email;
+        $("btnSignOut").style.display = "inline-flex";
+        showAuth(false);
+      } else {
+        $("userPill").textContent = "Not signed in";
+        $("btnSignOut").style.display = "none";
+        showAuth(true);
+      }
+    }
+
+    $("btnGoogle").addEventListener("click", async ()=>{
+      try{
+        $("authMsg").textContent = "";
+        // redirectTo must be allowed in Supabase Auth settings
+        const redirectTo = window.location.origin;
+        const { error } = await sb.auth.signInWithOAuth({
+          provider: "google",
+          options: { redirectTo }
+        });
+        if(error) throw error;
+      }catch(e){
+        $("authMsg").textContent = "Google sign-in error: " + (e.message || e);
+      }
+    });
+
+    $("btnEmail").addEventListener("click", async ()=>{
+      try{
+        $("authMsg").textContent = "";
+        const email = $("emailInput").value.trim();
+        if(!email) { $("authMsg").textContent = "Enter an email first."; return; }
+
+        // emailRedirectTo must be allowed too
+        const emailRedirectTo = window.location.origin;
+
+        const { error } = await sb.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo }
+        });
+
+        if(error) throw error;
+        $("authMsg").textContent = "Check your email for the login link ✅";
+        toast("Login link sent");
+      }catch(e){
+        $("authMsg").textContent = "Email sign-in error: " + (e.message || e);
+      }
+    });
+
+    $("btnSignOut").addEventListener("click", async ()=>{
+      await sb.auth.signOut();
+      toast("Signed out");
+      await refreshAuthUI();
+    });
+
+    // Keep UI synced with auth state
+    sb.auth.onAuthStateChange((_event, _session) => {
+      refreshAuthUI();
+    });
+
+    /********************
+     * INIT
+     ********************/
+    (function init(){
+      setSubline();
+      ensureDay();
       save();
-      toast("Wiped");
-      renderAll();
-    }
-  };
-}
+      renderToday();
+      renderTextAreas();
+      bindInputs();
+      showTab("today");
 
-function getISOWeekKey(date = new Date()){
-  // returns YYYY-WW
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-  return `${d.getUTCFullYear()}-${String(weekNo).padStart(2,"0")}`;
-}
-
-function renderWeekly(){
-  const wk = getISOWeekKey();
-  const w = state.weekly[wk] || {worked:"", didnt:"", fix:""};
-  document.getElementById("wWorked").value = w.worked || "";
-  document.getElementById("wDidnt").value = w.didnt || "";
-  document.getElementById("wFix").value = w.fix || "";
-
-  document.getElementById("saveWeekly").onclick = ()=>{
-    state.weekly[wk] = {
-      worked: document.getElementById("wWorked").value.trim(),
-      didnt: document.getElementById("wDidnt").value.trim(),
-      fix: document.getElementById("wFix").value.trim(),
-      savedAt: Date.now()
-    };
-    save();
-    document.getElementById("weeklySaved").style.display="block";
-    setTimeout(()=>document.getElementById("weeklySaved").style.display="none", 1000);
-    toast("Weekly saved");
-    renderCal14();
-  };
-
-  renderCal14();
-}
-
-function renderCal14(){
-  const wrap = document.getElementById("cal14");
-  wrap.innerHTML = "";
-  for(let i=0;i<14;i++){
-    const dt = new Date();
-    dt.setDate(dt.getDate()-i);
-    const k = dt.toISOString().slice(0,10);
-    const d = state.day[k];
-    const tracked = d ? (
-      (Object.values(d.checks||{}).some(Boolean)) ||
-      (Number(d.waterL||0)>0) ||
-      (String(d.steps||"").trim()!=="") ||
-      (String(d.sleepH||"").trim()!=="") ||
-      (d.movement && d.movement!=="none")
-    ) : false;
-    const box = document.createElement("div");
-    box.className="check";
-    box.innerHTML = `<label>${k}</label><span class="tag">${tracked ? "tracked ✅" : "—"}</span>`;
-    wrap.appendChild(box);
-  }
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-}
-
-function renderAll(){
-  bindToday();
-  renderKPIs();
-  renderGoals();
-  renderJournal();
-  renderReminders();
-  renderWeekly();
-}
-
-/* ====== Reminders / Notifications (best-effort) ====== */
-const btnNotif = document.getElementById("btnNotif");
-btnNotif.onclick = async () => {
-  if(!("Notification" in window)) return toast("Notifications not supported");
-  if(Notification.permission === "granted") return toast("Already enabled");
-  const p = await Notification.requestPermission();
-  toast(p === "granted" ? "Enabled" : "Not enabled");
-};
-
-function maybeNotify(title, body){
-  if(Notification.permission !== "granted") return;
-  try { new Notification(title, { body }); } catch(e){}
-}
-
-function checkRemindersLoop(){
-  const style = state.reminders.style || "gentle";
-  const d = getDay();
-  const now = new Date();
-  const hhmm = now.toTimeString().slice(0,5);
-
-  // water reminder
-  if(state.reminders.tWater && hhmm === state.reminders.tWater){
-    if(Number(d.waterL||0) < 2){
-      const msg = style==="strict" ? "Log your water now. 1L is enough to win." : "Quick water check — 1L helps.";
-      maybeNotify("Water", msg);
-    }
-  }
-
-  // course reminder
-  if(state.reminders.tCourse && hhmm === state.reminders.tCourse){
-    if(!(d.checks && d.checks.coursera)){
-      const msg = style==="strict" ? "Do 10 minutes Coursera now. Minimum counts." : "Tiny Coursera time? 10 minutes.";
-      maybeNotify("Coursera", msg);
-    }
-  }
-}
-setInterval(checkRemindersLoop, 1000 * 30);
-
-/* ====== PWA (Service Worker) ====== */
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js").catch(()=>{});
-}
-
-/* init */
-renderAll();
-save();
-async function loginGoogle() {
-  await sb.auth.signInWithOAuth({ provider: "google" });
-}
-
-async function loginEmail() {
-  try {
-    const email = document.getElementById("emailInput")?.value?.trim();
-    if (!email) return alert("Enter email");
-
-    const { error } = await sb.auth.signInWithOtp({ email });
-
-    if (error) return alert("Supabase error: " + error.message);
-
-    alert("Check your email for the login link.");
-  } catch (e) {
-    alert("Code error: " + (e?.message || e));
-  }
-}
-
-</script>
+      // start auth flow
+      refreshAuthUI();
+    })();
+  </script>
 </body>
 </html>
+
+
