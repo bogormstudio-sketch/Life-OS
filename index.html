@@ -269,10 +269,7 @@
 const SUPABASE_URL = "https://ogatcgdefwelciohqhsy.supabase.co"
 const SUPABASE_ANON_KEY = "sb_publishable_lW_rK73SLbZyb_sHRD562g_TJydjNI_"
 
-const supabase = supabaseJs.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+const sb = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   
 /* ========= Life OS v1 (local-first) ========= */
 const LS_KEY = "life_os_v1";
