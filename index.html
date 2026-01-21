@@ -529,6 +529,7 @@
     }
 
     function bindInputs(){
+      
       $("focusLine").addEventListener("input", (e)=>{
         ensureDay().focusLine = e.target.value.trim();
         save();
@@ -602,6 +603,65 @@
           ? "Notifications enabled ✅"
           : "Notifications blocked. You can enable it from browser settings.";
       });
+        // ===== TODAY TODO LIST =====
+  const todoInput = $("todoInput");
+  const todoAdd = $("todoAdd");
+  const todoList = $("todoList");
+
+  function addTodo(){
+    const text = (todoInput?.value || "").trim();
+    if(!text) return;
+
+    const d = ensureDay();
+    if(!Array.isArray(d.todos)) d.todos = [];
+    if(d.todos.length >= 5){
+      toast("Max 5 tasks today");
+      return;
+    }
+
+    d.todos.push({ text, done:false });
+    todoInput.value = "";
+    save();
+    renderToday();
+  }
+
+  if(todoAdd){
+    todoAdd.addEventListener("click", addTodo);
+  }
+
+  if(todoInput){
+    todoInput.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter"){
+        e.preventDefault();
+        addTodo();
+      }
+    });
+  }
+
+  if(todoList){
+    todoList.addEventListener("click", (e)=>{
+      const d = ensureDay();
+      if(!Array.isArray(d.todos)) d.todos = [];
+
+      const delBtn = e.target.closest("[data-todo-del]");
+      if(delBtn){
+        const idx = Number(delBtn.getAttribute("data-todo-del"));
+        d.todos.splice(idx, 1);
+        save();
+        renderToday();
+        return;
+      }
+
+      const cb = e.target.closest("[data-todo-check]");
+      if(cb){
+        const idx = Number(cb.getAttribute("data-todo-check"));
+        d.todos[idx].done = cb.checked;
+        save();
+        renderToday();
+      }
+    });
+  }
+
     }
 
     /********************
