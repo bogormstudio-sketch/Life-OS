@@ -444,6 +444,7 @@
           sleep: "",
           movement: "",
           focusLine: ""
+          todos: []   // ✅ new
         };
       }
       return state.day[k];
@@ -469,7 +470,41 @@
     /********************
      * Render + bind
      ********************/
-    function renderToday(){
+    function renderToday()
+          // ✅ Render todos
+      renderTodos();
+        function renderTodos(){
+      const d = ensureDay();
+      if(!Array.isArray(d.todos)) d.todos = [];
+
+      const list = $("todoList");
+      const hint = $("todoHint");
+
+      // Clear list
+      list.innerHTML = "";
+
+      // Hint text
+      hint.textContent = (d.todos.length >= 5)
+        ? "Max 5 tasks reached for today."
+        : "Tip: keep it small so it feels easy.";
+
+      // Show tasks
+      d.todos.forEach((t, idx) => {
+        const row = document.createElement("label");
+        row.className = "checkrow";
+        row.style.marginBottom = "10px";
+        row.innerHTML = `
+          <input type="checkbox" data-todo-check="${idx}" ${t.done ? "checked" : ""}>
+          <div style="flex:1; ${t.done ? "opacity:.6; text-decoration:line-through;" : ""}">
+            ${t.text}
+          </div>
+          <button type="button" class="btn small secondary" data-todo-del="${idx}">X</button>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    {
       const d = ensureDay();
 
       $("focusLine").value = d.focusLine || "";
