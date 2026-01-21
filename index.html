@@ -470,57 +470,57 @@
     /********************
      * Render + bind
      ********************/
-    function renderToday()
-          // ✅ Render todos
-      renderTodos();
-        function renderTodos(){
-      const d = ensureDay();
-      if(!Array.isArray(d.todos)) d.todos = [];
+    /********************
+ * Render + bind
+ ********************/
+function renderTodos(){
+  const d = ensureDay();
+  if(!Array.isArray(d.todos)) d.todos = [];
 
-      const list = $("todoList");
-      const hint = $("todoHint");
+  const list = $("todoList");
+  const hint = $("todoHint");
+  if(!list || !hint) return;
 
-      // Clear list
-      list.innerHTML = "";
+  list.innerHTML = "";
 
-      // Hint text
-      hint.textContent = (d.todos.length >= 5)
-        ? "Max 5 tasks reached for today."
-        : "Tip: keep it small so it feels easy.";
+  hint.textContent = (d.todos.length >= 5)
+    ? "Max 5 tasks reached for today."
+    : "Tip: keep it small so it feels easy.";
 
-      // Show tasks
-      d.todos.forEach((t, idx) => {
-        const row = document.createElement("label");
-        row.className = "checkrow";
-        row.style.marginBottom = "10px";
-        row.innerHTML = `
-          <input type="checkbox" data-todo-check="${idx}" ${t.done ? "checked" : ""}>
-          <div style="flex:1; ${t.done ? "opacity:.6; text-decoration:line-through;" : ""}">
-            ${t.text}
-          </div>
-          <button type="button" class="btn small secondary" data-todo-del="${idx}">X</button>
-        `;
-        list.appendChild(row);
-      });
-    }
+  d.todos.forEach((t, idx) => {
+    const row = document.createElement("label");
+    row.className = "checkrow";
+    row.style.marginBottom = "10px";
+    row.innerHTML = `
+      <input type="checkbox" data-todo-check="${idx}" ${t.done ? "checked" : ""}>
+      <div style="flex:1; ${t.done ? "opacity:.6; text-decoration:line-through;" : ""}">
+        ${t.text}
+      </div>
+      <button type="button" class="btn small secondary" data-todo-del="${idx}">X</button>
+    `;
+    list.appendChild(row);
+  });
+}
 
-    {
-      const d = ensureDay();
+function renderToday(){
+  const d = ensureDay();
 
-      $("focusLine").value = d.focusLine || "";
-      $("waterVal").textContent = String(d.water || 0);
-      $("steps").value = d.steps ?? "";
-      $("sleep").value = d.sleep ?? "";
-      $("movement").value = d.movement ?? "";
+  $("focusLine").value = d.focusLine || "";
+  $("waterVal").textContent = String(d.water || 0);
+  $("steps").value = d.steps ?? "";
+  $("sleep").value = d.sleep ?? "";
+  $("movement").value = d.movement ?? "";
 
-      document.querySelectorAll('input[type="checkbox"][data-check]').forEach(cb=>{
-        const key = cb.getAttribute("data-check");
-        cb.checked = !!(d.checks && d.checks[key]);
-      });
+  document.querySelectorAll('input[type="checkbox"][data-check]').forEach(cb=>{
+    const key = cb.getAttribute("data-check");
+    cb.checked = !!(d.checks && d.checks[key]);
+  });
 
-      // low energy mode UI
-      $("btnLowEnergy").textContent = state.meta.lowEnergy ? "Low-energy: ON" : "Low-energy: OFF";
-    }
+  $("btnLowEnergy").textContent = state.meta.lowEnergy ? "Low-energy: ON" : "Low-energy: OFF";
+
+  // ✅ draw todo list
+  renderTodos();
+}
 
     function renderTextAreas(){
       $("goalsText").value = state.goals || "";
